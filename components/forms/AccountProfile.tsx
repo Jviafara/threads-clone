@@ -3,17 +3,19 @@
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { updateUser } from '@/lib/actions/user.actions';
+import { useUploadThing } from '@/lib/uploadThing';
 import { isBase64Image } from '@/lib/utils';
 import { UserValidation } from '@/lib/validations/user';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
 import { ChangeEvent, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -34,6 +36,10 @@ interface Props {
 
 export default function AccountProfile({ user, btnTitle }: Props) {
     const [files, setFiles] = useState<File[]>([]);
+    const { startUpload } = useUploadThing('media');
+
+    const router = useRouter();
+    const pathname = usePathname();
 
     const form = useForm({
         resolver: zodResolver(UserValidation),
@@ -68,10 +74,34 @@ export default function AccountProfile({ user, btnTitle }: Props) {
         }
     };
 
-    function onSubmit(values: z.infer<typeof UserValidation>) {
+    async function onSubmit(values: z.infer<typeof UserValidation>) {
         const blob = values.profile_photo;
 
         const hasImageChanged = isBase64Image(blob);
+
+        if (hasImageChanged) {
+            const imgRes = await startUpload(files);
+
+            if (imgRes && imgRes[0].url) {
+                values.profile_photo = imgRes[0].url;
+            }
+        }
+
+        // Update User Profile
+        await updateUser({
+            username: values.username,
+            name: values.name,
+            bio: values.bio,
+            image: values.profile_photo,
+            userId: user.id,
+            path: pathname,
+        });
+
+        if (pathname === '/profile/edit') {
+            router.back();
+        } else {
+            router.push('/');
+        }
     }
 
     return (
@@ -115,6 +145,7 @@ export default function AccountProfile({ user, btnTitle }: Props) {
                                     className="account-form_image-input"
                                 />
                             </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -133,6 +164,7 @@ export default function AccountProfile({ user, btnTitle }: Props) {
                                     className="account-form_input no-focus"
                                 />
                             </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -151,6 +183,7 @@ export default function AccountProfile({ user, btnTitle }: Props) {
                                     className="account-form_input no-focus"
                                 />
                             </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -169,12 +202,13 @@ export default function AccountProfile({ user, btnTitle }: Props) {
                                     className="account-form_input no-focus"
                                 />
                             </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
 
                 <Button type="submit" className="bg-primary-500">
-                    Submit
+                    {btnTitle}
                 </Button>
             </form>
         </Form>
