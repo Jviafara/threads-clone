@@ -1,11 +1,11 @@
 import ThreadCard from '@/components/cards/ThreadCard';
-import { fetchPost } from '@/lib/actions/thread.actions';
+import { fetchPosts } from '@/lib/actions/thread.actions';
 import { currentUser } from '@clerk/nextjs';
 
 export default async function Home() {
     const user = await currentUser();
 
-    const result = await fetchPost(1, 30);
+    const result = await fetchPosts(1, 30);
 
     return (
         <>
@@ -16,12 +16,16 @@ export default async function Home() {
                 ) : (
                     <>
                         {result.posts.map((post) => {
-                            const p: Omit<Omit<Post, never>, never> = post;
+                            const thread: Omit<
+                                Omit<Thread, never>,
+                                never
+                            > = post;
                             return (
                                 <ThreadCard
                                     key={post._id}
                                     currentUserId={user?.id || ''}
-                                    post={p}
+                                    thread={thread}
+                                    author={thread.author}
                                 />
                             );
                         })}

@@ -38,7 +38,7 @@ export async function createThread({
     }
 }
 
-export async function fetchPost(pageNumber = 1, pageSize = 20) {
+export async function fetchPosts(pageNumber = 1, pageSize = 20) {
     try {
         connectToDB();
 
@@ -72,6 +72,79 @@ export async function fetchPost(pageNumber = 1, pageSize = 20) {
 
         return { posts, isNext };
     } catch (error: any) {
-        throw new Error(`Faild to create/update Post: ${error.message}`);
+        throw new Error(`Faild to Fetch Posts: ${error.message}`);
+    }
+}
+
+export async function fetchPostDetails(id: string) {
+    try {
+        connectToDB();
+
+        // Fetch Post
+        const postQuery = Thread.findById(id)
+            .populate({
+                path: 'author',
+                model: User,
+                select: '_id id name image',
+            })
+            .populate({
+                path: 'children',
+                populate: [
+                    {
+                        path: 'author',
+                        model: User,
+                        select: '_id name parentID image',
+                    },
+                    {
+                        path: 'children',
+                        model: Thread,
+                        populate: {
+                            path: 'author',
+                            model: User,
+                            select: '_id id name image',
+                        },
+                    },
+                ],
+            });
+
+        const post = await postQuery.exec();
+
+        return post;
+    } catch (error: any) {
+        throw new Error(`Faild to Fetch Post: ${error.message}`);
+    }
+}
+
+export async function addCommentToThread(
+    threadId: string,
+    commentText: string,
+    userId: string,
+    path: string
+) {
+    try {
+        connectToDB();
+
+        // Fetch original Thread
+        const originalThread = await Thread.findById(threadId);
+        if (!originalThread) {
+            throw new Error('Thread not Found');
+        }
+
+        // Create new Thread comment
+        const commentThread = new Thread({
+            text: commentText,
+            author: userId,
+            parentId: threadId,
+        });
+
+        const commentSaved = await commentThread.save();
+
+        originalThread.children.push(commentSaved._id);
+        if (!originalThread?.isComment) originalThread.isComment = true;
+        await originalThread.save();
+
+        revalidatePath(path);
+    } catch (error: any) {
+        throw new Error(`Error Adding new Comment: ${error.message}`);
     }
 }

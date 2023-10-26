@@ -1,4 +1,4 @@
-interface Post {
+interface Thread {
     _id: string;
     text: string;
     author: Author;

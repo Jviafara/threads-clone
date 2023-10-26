@@ -11,6 +11,7 @@ const threadSchema = new mongoose.Schema(
         community: { type: mongoose.Schema.Types.ObjectId, ref: 'Community' },
         parentId: String,
         children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Thread' }],
+        isComment: { type: Boolean, default: false },
     },
     { timestamps: true }
 );

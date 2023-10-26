@@ -1,41 +1,48 @@
+import { currentUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import Link from 'next/link';
 
 interface Params {
     currentUserId: string;
-    post: Post;
+    thread: Thread;
+    author: Author;
 }
 
-function ThreadCard({ currentUserId, post }: Params) {
+function ThreadCard({ currentUserId, thread, author }: Params) {
     return (
-        <article className="flex w-full flex-col rounded-xl bg-dark-2 p-7">
+        <article
+            className={`flex w-full flex-col rounded-xl   ${
+                !thread?.parentId ? 'bg-dark-2 p-7' : 'px-0 xs:px-7'
+            }`}>
             <div className="flex items-start justify-between">
                 <div className="flex w-full flex-1 flex-row gap-4">
                     <div className="flex flex-col items-center">
                         <Link
-                            href={`/profile/${post.author.id}`}
+                            href={`/profile/${author.id}`}
                             className="relative h-11 w-11">
                             <Image
-                                src={post.author.image}
+                                src={author.image}
                                 alt="User image"
-                                fill
+                                width={48}
+                                height={48}
                                 className="cursor-pointer rounded-full"
                             />
                         </Link>
                         <div className="thread-card_bar" />
                     </div>
                     <div className="flex w-full flex-col">
-                        <Link
-                            href={`/profile/${post.author.id}`}
-                            className="w-fit">
+                        <Link href={`/profile/${author.id}`} className="w-fit">
                             <h4 className="cursor-pointer text-base-semibold text-light-1">
-                                {post.author.name}
+                                {author.name}
                             </h4>
                         </Link>
                         <p className="mt-2 text-small-regular text-light-2">
-                            {post.text}
+                            {thread.text}
                         </p>
-                        <div className="mt-5 flex flex-col gap-3">
+                        <div
+                            className={`${
+                                thread.isComment && 'mb-10'
+                            } mt-5 flex flex-col gap-3`}>
                             <div className="flex gap-3.5">
                                 <Image
                                     src={'/assets/heart-gray.svg'}
@@ -44,7 +51,7 @@ function ThreadCard({ currentUserId, post }: Params) {
                                     height={24}
                                     className="cursor-pointer object-contain"
                                 />
-                                <Link href={`/thread/${post._id}`}>
+                                <Link href={`/thread/${thread._id}`}>
                                     <Image
                                         src={'/assets/reply.svg'}
                                         alt="reply"
@@ -68,6 +75,14 @@ function ThreadCard({ currentUserId, post }: Params) {
                                     className="cursor-pointer object-contain"
                                 />
                             </div>
+
+                            {thread.isComment && thread.children.length > 0 && (
+                                <Link href={`/thread/${thread._id}`}>
+                                    <p className="mt-1 text-subtle-medium text-gray-1">
+                                        {thread.children.length}
+                                    </p>
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </div>
