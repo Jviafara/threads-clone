@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation';
-
 import Accountprofile from '@/components/form/Accountprofile';
 import { currentUser } from '@clerk/nextjs/server';
 
