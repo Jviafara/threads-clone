@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
             },
             {
                 protocol: 'https',
-                hostname: 'uploadthing.com',
+                hostname: 'utfs.io',
             },
             {
                 protocol: 'https',
