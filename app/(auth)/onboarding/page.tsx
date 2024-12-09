@@ -1,4 +1,4 @@
-import Accountprofile from '@/components/form/Accountprofile';
+import Accountprofile from '@/components/form/AccountProfile';
 import { fetchUser } from '@/lib/actions/user.actions';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
@@ -13,7 +13,7 @@ async function Page() {
     const userData = JSON.parse(
         JSON.stringify({
             id: user.id,
-            objectId: userInfo._id,
+            objectId: userInfo?._id,
             username: userInfo ? userInfo?.username : user.username,
             name: userInfo ? userInfo?.name : user.firstName ?? '',
             bio: userInfo ? userInfo?.bio : '',

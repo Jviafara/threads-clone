@@ -17,7 +17,7 @@ export default function RootLayout({
     return (
         <ClerkProvider
             signInFallbackRedirectUrl='/onboarding'
-            signUpFallbackRedirectUrl='/'>
+            signUpFallbackRedirectUrl='/onboarding'>
             <html lang='en'>
                 <body className={`${inter.className} bg-dark-1`}>
                     {children}

@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import Thread from '../models/thread.model';
 import User from '../models/user.model';
 import { connectToDB } from '../mongoose';
 
@@ -16,7 +17,7 @@ interface Params {
 export async function fetchUser(userId: string) {
     try {
         connectToDB();
-        return await User.findOne({ id: userId });
+        return JSON.parse(JSON.stringify(await User.findOne({ id: userId })));
         // .populate({
         //     path: 'communities',
         //     model: Community,
@@ -26,16 +27,48 @@ export async function fetchUser(userId: string) {
     }
 }
 
+export async function fetchUserThreads(userId: string) {
+    try {
+        connectToDB();
+
+        const user = await User.findOne({ id: userId });
+        if (!user) throw new Error('User not found');
+
+        return JSON.parse(
+            JSON.stringify(
+                await Thread.find({ author: user._id })
+                    .populate({
+                        path: 'author',
+                        model: User,
+                        select: 'name image id',
+                    })
+                    .populate({
+                        path: 'children',
+                        model: Thread,
+                        populate: {
+                            path: 'author',
+                            model: User,
+                            select: 'name image id',
+                        },
+                    })
+            )
+        );
+    } catch (error: any) {
+        throw new Error(`Failed to fetch users threads: ${error.message}`);
+    }
+}
+
 export async function updateUser({
     userId,
+    username,
     bio,
     name,
     path,
-    username,
     image,
 }: Params): Promise<void> {
     try {
         connectToDB();
+
         await User.findOneAndUpdate(
             { id: userId },
             {
@@ -47,6 +80,7 @@ export async function updateUser({
             },
             { upsert: true }
         );
+        const user = await User.findOne({ id: userId });
 
         if (path === '/profile/edit') {
             revalidatePath(path);

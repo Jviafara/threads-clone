@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -21,7 +20,7 @@ import { isBase64Image } from '@/lib/utils';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { ChangeEvent, useCallback, useState } from 'react';
-import { z } from 'zod';
+import * as z from 'zod';
 import { Textarea } from '../ui/textarea';
 
 interface Props {
@@ -38,10 +37,6 @@ interface Props {
 
 export default function Accountprofile({ user, btnTitle }: Props) {
     const [files, setFiles] = useState<File[]>([]);
-
-    const onDrop = useCallback((acceptedFiles: File[]) => {
-        setFiles(acceptedFiles);
-    }, []);
 
     const { startUpload } = useUploadThing('media');
 
@@ -72,8 +67,8 @@ export default function Accountprofile({ user, btnTitle }: Props) {
 
         await updateUser({
             name: values.name,
-            path: pathname,
             username: values.username,
+            path: pathname,
             userId: user.id,
             bio: values.bio,
             image: values.profile_photo,
@@ -150,6 +145,7 @@ export default function Accountprofile({ user, btnTitle }: Props) {
                                     }
                                 />
                             </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -168,6 +164,7 @@ export default function Accountprofile({ user, btnTitle }: Props) {
                                     {...field}
                                 />
                             </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -186,6 +183,7 @@ export default function Accountprofile({ user, btnTitle }: Props) {
                                     {...field}
                                 />
                             </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -204,6 +202,7 @@ export default function Accountprofile({ user, btnTitle }: Props) {
                                     {...field}
                                 />
                             </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
