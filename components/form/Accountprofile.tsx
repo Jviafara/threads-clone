@@ -67,8 +67,8 @@ export default function Accountprofile({ user, btnTitle }: Props) {
 
         await updateUser({
             name: values.name,
-            path: pathname,
             username: values.username,
+            path: pathname,
             userId: user.id,
             bio: values.bio,
             image: values.profile_photo,

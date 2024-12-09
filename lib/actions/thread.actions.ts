@@ -1,4 +1,5 @@
 'use server';
+
 import { revalidatePath } from 'next/cache';
 import Thread from '../models/thread.model';
 import User from '../models/user.model';
@@ -32,5 +33,42 @@ export async function createThread({
         revalidatePath(path);
     } catch (err: any) {
         throw new Error(`Error creating thread: ${err.message}`);
+    }
+}
+
+export async function fetchPosts(pageNumber = 1, pageSize = 20) {
+    try {
+        connectToDB();
+
+        // Calculate post slip for pagination
+        const skipNumber = (pageNumber - 1) * pageSize;
+
+        // Fetch posts that have no parents (Top-level threads)
+        const postQuery = Thread.find({
+            parentId: { $in: [null, undefined] },
+        })
+            .sort({ createdAt: 'desc' })
+            .skip(skipNumber)
+            .limit(pageSize)
+            .populate({ path: 'author', model: User })
+            .populate({
+                path: 'children',
+                populate: {
+                    path: 'author',
+                    model: User,
+                    select: '_id name paraentId image',
+                },
+            });
+
+        const totalPosts = await Thread.countDocuments({
+            parentId: { $in: [null, undefined] },
+        });
+
+        const posts = await postQuery.exec();
+        const isNext = totalPosts > skipNumber + posts.length;
+
+        return { posts, isNext };
+    } catch (error) {
+        throw new Error(`Error fetching posts: ${error}`);
     }
 }

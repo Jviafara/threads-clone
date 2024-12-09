@@ -28,14 +28,15 @@ export async function fetchUser(userId: string) {
 
 export async function updateUser({
     userId,
+    username,
     bio,
     name,
     path,
-    username,
     image,
 }: Params): Promise<void> {
     try {
         connectToDB();
+
         await User.findOneAndUpdate(
             { id: userId },
             {
@@ -47,6 +48,7 @@ export async function updateUser({
             },
             { upsert: true }
         );
+        const user = await User.findOne({ id: userId });
 
         if (path === '/profile/edit') {
             revalidatePath(path);
