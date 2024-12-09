@@ -9,7 +9,7 @@ export default async function CreateThread() {
     if (!user) return null;
 
     const userInfo = JSON.parse(JSON.stringify(await fetchUser(user.id)));
-    if (!userInfo?.onboarded) redirect('/');
+    if (!userInfo?.onboarded) redirect('/onboarding');
 
     return (
         <>
